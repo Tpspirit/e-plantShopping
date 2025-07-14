@@ -2,9 +2,15 @@ import React, { useState, useEffect } from "react";
 import "./ProductList.css";
 import CartItem from "./CartItem";
 import { addItem } from "./CartSlice";
+import { useDispatch, useSelector } from "react-redux";
 function ProductList({ onHomeClick }) {
   const [showCart, setShowCart] = useState(false);
   const [showPlants, setShowPlants] = useState(false); // State to control the visibility of the About Us page
+  const [addedToCart, setAddedToCart] = useState({});
+  const dispatch = useDispatch();
+  const cart = useSelector((state) => state.cart.items);
+
+  const totalQuantity = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   const plantsArray = [
     {
@@ -289,7 +295,6 @@ function ProductList({ onHomeClick }) {
     setShowCart(false);
   };
 
-  const [addedToCart, setAddedToCart] = useState({});
   const handleAddToCart = (product) => {
     dispatch(addItem(product)); // Dispatch the action to add the product to the cart (Redux action)
 
@@ -348,6 +353,22 @@ function ProductList({ onHomeClick }) {
                     id="mainIconPathAttribute"
                   ></path>
                 </svg>
+                {totalQuantity > 0 && (
+                  <span
+                    style={{
+                      position: "absolute",
+                      top: "0",
+                      right: "0",
+                      backgroundColor: "red",
+                      color: "white",
+                      borderRadius: "50%",
+                      padding: "2px 6px",
+                      fontSize: "14px",
+                    }}
+                  >
+                    {totalQuantity}
+                  </span>
+                )}
               </h1>
             </a>
           </div>
@@ -390,13 +411,18 @@ function ProductList({ onHomeClick }) {
                           {plant.description}
                         </div>{" "}
                         {/* Display plant description */}
-                        <div className="product-cost">${plant.cost}</div>{" "}
+                        <div className="product-cost">{plant.cost}</div>{" "}
                         {/* Display plant cost */}
                         <button
-                          className="product-button"
+                          className={`product-button ${
+                            addedToCart[plant.name] ? "added-to-cart" : ""
+                          }`}
                           onClick={() => handleAddToCart(plant)} // Handle adding plant to cart
+                          disabled={addedToCart[plant.name]}
                         >
-                          Add to Cart
+                          {addedToCart[plant.name]
+                            ? "Added to Cart"
+                            : "Add to Cart"}
                         </button>
                       </div>
                     )
